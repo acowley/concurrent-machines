@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleContexts, GADTs #-}
+-- | Support for machines with two inputs from which input may be
+-- drawn deterministically. In contrast to "Data.Machine.Tee", the two
+-- inputs are eagerly run concurrently in this implementation.
 module Data.Machine.Concurrent.Tee where
 import Control.Concurrent.Async.Lifted (wait)
 import Control.Monad.Trans.Control (MonadBaseControl)

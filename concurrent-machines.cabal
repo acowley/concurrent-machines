@@ -18,6 +18,7 @@ library
                        Data.Machine.Regulated,
                        Data.Machine.Concurrent.AsyncStep,
                        Data.Machine.Concurrent.Buffer,
+                       Data.Machine.Concurrent.Fanout,
                        Data.Machine.Concurrent.Scatter,
                        Data.Machine.Concurrent.Tee,
                        Data.Machine.Concurrent.Wye

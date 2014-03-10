@@ -1,10 +1,14 @@
 {-# LANGUAGE FlexibleContexts, GADTs, RankNTypes #-}
+-- | Internal helpers for taking asynchronous machine steps.
 module Data.Machine.Concurrent.AsyncStep where
 import Control.Concurrent.Async.Lifted (Async, async, wait)
 import Control.Monad.Trans.Control (MonadBaseControl, StM)
 import Data.Machine
 
+-- | Slightly more compact notation for a 'Step'.
 type MachineStep m k o = Step k o (MachineT m k o)
+
+-- | Compact notation for a 'Step' taken asynchronously.
 type AsyncStep m k o = Async (StM m (MachineStep m k o))
 
 -- | Build an 'Await' step given a continuation that provides
@@ -16,6 +20,7 @@ type AsyncStep m k o = Async (StM m (MachineStep m k o))
 awaitStep :: (a -> d) -> k' a -> d -> (d -> r) -> Step k' b r
 awaitStep f sel ff k = Await (k . f) sel (k ff)
 
+-- | Run one step of a machine as an 'Async' operation.
 asyncRun :: MonadBaseControl IO m => MachineT m k o -> m (AsyncStep m k o)
 asyncRun = async . runMachineT
 
