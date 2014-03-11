@@ -5,8 +5,13 @@ synopsis:            Concurrent networked stream transducers
 description: A simple use-case for this library is to run the stages
              of a pipelined streaming computation concurrently. If
              data is streaming through multiple processing stages, you
-             might build a machine like @step1 >~> step2 >~>
-             step3@. The @>~>@ operator connects the machines on
+             might build a machine like
+             .
+             @
+             step1 >~> step2 >~> step3
+             @
+             .
+             The @>~>@ operator connects the machines on
              either side with a one-element buffer. This means that
              data is pulled from upstream sources eagerly (perhaps
              pulling one more value than will be consumed by
