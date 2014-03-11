@@ -81,9 +81,9 @@ scatter sinks = MachineT $ mapM asyncRun sinks
 --                              a          \
 --                             /            \
 --    source -- Either a b -->                -- r -->
---                             \            /
+--                             \\            /
 --                              b          /
---                               \       /
+--                               \\       /
 --                                 sinkR 
 -- @
 mergeSum :: MonadBaseControl IO m
@@ -199,9 +199,9 @@ leftOnly snk = repeatedly (await >>= either yield (const stop)) ~> snk
 --                         a          \
 --                        /            \
 --    source -- (a,b) -->               -- r -->
---                        \            /
+--                        \\            /
 --                         b         /
---                           \     /
+--                           \\     /
 --                            sink2 
 -- @
 splitProd :: MonadBaseControl IO m
