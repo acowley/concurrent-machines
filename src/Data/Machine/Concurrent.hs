@@ -22,7 +22,9 @@ module Data.Machine.Concurrent (module Data.Machine,
                                 -- * Concurrent multiple-input machines
                                 wye, tee, scatter, splitSum, mergeSum, 
                                 splitProd) where
+import Control.Applicative
 import Control.Concurrent.Async.Lifted
+import Control.Monad (join)
 import Control.Monad.Trans.Control
 import Data.Machine hiding (tee, wye)
 import Data.Machine.Concurrent.AsyncStep
@@ -46,19 +48,7 @@ import Data.Machine.Concurrent.Tee
 -- @
 (<~<) :: MonadBaseControl IO m
      => ProcessT m b c -> MachineT m k b -> MachineT m k c
-mp <~< ma = MachineT $ asyncRun ma >>= go mp . Just
-  where go :: MonadBaseControl IO m
-           => ProcessT m b c
-           -> Maybe (Async (StM m (MachineStep m k b)))
-           -> m (MachineStep m k c)
-        go snk src = runMachineT snk >>= \v -> case v of
-          Stop            -> return Stop
-          Yield o k       -> return . Yield o . MachineT $ go k src
-          Await f Refl ff -> maybe (return Stop) wait src >>= \u -> case u of
-            Stop           -> go ff Nothing
-            Yield o k      -> async (runMachineT k) >>= go (f o) . Just
-            Await g kg fg  -> 
-              asyncAwait g kg fg $ MachineT . go (encased v) . Just
+mp <~< ma = racers ma mp
 
 -- | Flipped ('<~<').
 (>~>) :: MonadBaseControl IO m
@@ -66,3 +56,69 @@ mp <~< ma = MachineT $ asyncRun ma >>= go mp . Just
 ma >~> mp = mp <~< ma
 
 infixl 7 >~>
+
+-- | We want the first available response.
+waitEither' :: MonadBaseControl IO m 
+            => Maybe (Async (StM m a)) -> Async (StM m b)
+            -> m (Either a b)
+waitEither' Nothing y = Right <$> wait y
+waitEither' (Just x) y = waitEither x y
+
+-- | Let a source and a sink chase each other, providing an effective
+-- one-element buffer between the two. The idea is to run both
+-- concurrently at all times so that as soon as the sink 'Await's, we
+-- have a source-yielded value to provide it. This, of course,
+-- involves eagerly running the source, percolating its 'Await's up
+-- the chain as soon as possible.
+racers :: MonadBaseControl IO m
+       => MachineT m k a -> ProcessT m a b -> MachineT m k b
+racers src snk = MachineT . join $
+                 go <$> (Just <$> asyncRun src) <*> asyncRun snk
+  where go :: MonadBaseControl IO m
+           => Maybe (AsyncStep m k a)
+           -> AsyncStep m (Is a) b
+           -> m (MachineStep m k b)
+        go srcA snkA =
+          waitEither' srcA snkA >>= \n -> case n of
+            Left Stop -> go Nothing snkA
+            Left (Yield o k) -> wait snkA >>= \m -> case m of
+              Stop -> return Stop
+              Yield o' k' -> return . Yield o' . MachineT . flushDown k' $
+                             \f -> join $ go <$> (Just <$> asyncRun k)
+                                             <*> asyncRun (f o)
+              Await f Refl _ -> join $ go <$> (Just <$> asyncRun k)
+                                          <*> asyncRun (f o)
+            Left (Await g kg fg) -> asyncAwait g kg fg $
+                                    MachineT . flip go snkA . Just
+            Right Stop -> return Stop
+            Right (Yield o k) -> asyncRun k >>=
+                                 return . Yield o . MachineT . go srcA
+            Right (Await f Refl ff) -> case srcA of
+              Nothing -> asyncRun ff >>= go Nothing
+              Just src' -> wait src' >>= \m -> case m of
+                Stop -> return Stop
+                Yield o k -> join $ go <$> (Just <$> asyncRun k)
+                                       <*> asyncRun (f o)
+                a -> feedUp (encased a) $ \o k -> join $
+                       go <$> (Just <$> asyncRun k) <*> asyncRun (f o)
+        -- If we have an upstream source value ready, we must flush
+        -- all available values yielded by downstream until it awaits.
+        flushDown :: Monad m
+                  => ProcessT m a b
+                  -> ((a -> ProcessT m a b) -> m (MachineStep m k b))
+                  -> m (MachineStep m k b)
+        flushDown m k = runMachineT m >>= \s -> case s of
+          Stop -> return Stop
+          Yield o m' -> return . Yield o . MachineT $ flushDown m' k
+          Await f Refl _ -> k f
+        -- If downstream is awaiting an input, we must pull in all
+        -- necessary upstream awaits until we have a yielded value to
+        -- push downstream.
+        feedUp :: MonadBaseControl IO m
+               => MachineT m k a
+               -> (a -> MachineT m k a -> m (MachineStep m k b))
+               -> m (MachineStep m k b)
+        feedUp m k = runMachineT m >>= \s -> case s of
+          Stop -> return Stop
+          Yield o m' -> k o m'
+          Await g kg fg -> return $ awaitStep g kg fg (MachineT . flip feedUp k)

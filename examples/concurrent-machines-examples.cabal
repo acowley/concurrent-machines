@@ -1,0 +1,39 @@
+name:                concurrent-machines-examples
+version:             0.1.0.0
+synopsis:            Examples of concurrent networked stream transducers.
+
+description: These example programs may be instructive to run, but you
+             probably do not want to install the anywhere. If you have
+             concurrent-machines installed in a sandbox, consider
+             using that sandbox for running these examples. For
+             example, if you have installed @concurrent-machines@ in
+             its own sandbox, you might prepare the examples by
+             running @cabal sandbox init --sandbox=../.cabal-sandbox@
+             in the @examples@ directory.
+             .
+             You can then run the @fanout@ example with @cabal run
+             fanout -- +RTS -N@ (likewise for the @pipeline@ example).
+
+license:             BSD3
+license-file:        LICENSE
+author:              Anthony Cowley
+maintainer:          acowley@gmail.com
+copyright:           Copyright (C) 2014 Anthony Cowley
+category:            Concurrency, Control
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+executable fanout
+  build-depends: concurrent-machines, time, base, transformers
+  hs-source-dirs: .
+  main-is: ExampleFanout.hs
+  default-language: Haskell2010
+  ghc-options: -O2 -threaded -rtsopts
+
+executable pipeline
+  build-depends: concurrent-machines, time, base, transformers
+  hs-source-dirs: .
+  main-is: Pipeline.hs
+  default-language: Haskell2010
+  ghc-options: -O2 -threaded -rtsopts

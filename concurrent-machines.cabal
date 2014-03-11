@@ -1,7 +1,22 @@
 name:                concurrent-machines
 version:             0.1.0.0
 synopsis:            Concurrent networked stream transducers
--- description:         
+
+description: A simple use-case for this library is to run the stages
+             of a pipelined streaming computation concurrently. If
+             data is streaming through multiple processing stages, you
+             might build a machine like @step1 >~> step2 >~>
+             step3@. The @>~>@ operator connects the machines on
+             either side with a one-element buffer. This means that
+             data is pulled from upstream sources eagerly (perhaps
+             pulling one more value than will be consumed by
+             downstream), but it also means that each stage can be
+             working simultaneously, increasing throughput of the
+             entire pipeline.
+             .
+             A few small examples are available in the @examples@
+             directory of the source repository.
+
 license:             BSD3
 license-file:        LICENSE
 author:              Anthony Cowley
@@ -11,6 +26,10 @@ category:            Concurrency, Control
 build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
+
+source-repository head
+  type:     git
+  location: http://github.com/acowley/concurrent-machines.git
 
 library
   exposed-modules:     Data.Machine.Concurrent,
