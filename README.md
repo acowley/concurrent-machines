@@ -1,4 +1,4 @@
-A simple example of a pipelined computation whose throughput is improved by concurrently running distinct processing stages is given in (`examples/Pipeline.hs`)[http://github.com/acowley/concurrent-machines/blob/master/examples/Pipeline.hs].
+A simple example of a pipelined computation whose throughput is improved by concurrently running distinct processing stages is given in [`examples/Pipeline.hs`](http://github.com/acowley/concurrent-machines/blob/master/examples/Pipeline.hs).
 
     import Data.Time.Clock (getCurrentTime, diffUTCTime)
     import Control.Concurrent (threadDelay)
