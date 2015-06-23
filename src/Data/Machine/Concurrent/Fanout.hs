@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GADTs #-}
+{-# LANGUAGE FlexibleContexts, GADTs, ScopedTypeVariables #-}
 -- | Provide a notion of fanout wherein a single input is passed to
 -- several consumers. The consumers are run concurrently.
 module Data.Machine.Concurrent.Fanout (fanout, fanoutSteps) where
@@ -16,13 +16,13 @@ import Data.List.NonEmpty (NonEmpty((:|)))
 -- | Feed a value to a 'ProcessT' at an 'Await' 'Step'. If the
 -- 'ProcessT' is awaiting a value, then its next step is
 -- returned. Otherwise, the original process is returned.
-feed :: MonadBaseControl IO m
+feed :: forall m a b. MonadBaseControl IO m
      => a -> ProcessT m a b
      -> m (Async (StM m ([b], Maybe (MachineStep m (Is a) b))))
-feed x m = async $ runMachineT m >>= \v ->
+feed x m = async $ runMachineT m >>= \(v :: MachineStep m (Is a) b) ->
              case v of
                Await f Refl _ -> runMachineT (f x) >>= flushYields
-               s -> return ([], Just s)
+               s -> return ([]::[b], Just s)
 
 -- | Like 'Data.List.mapAccumL' but with a monadic accumulating
 -- function.

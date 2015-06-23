@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GADTs, TupleSections #-}
+{-# LANGUAGE FlexibleContexts, GADTs, ScopedTypeVariables, TupleSections #-}
 -- | Place buffers between two machines. This is most useful with
 -- irregular production rates.
 module Data.Machine.Concurrent.Buffer (
@@ -91,7 +91,7 @@ data BufferRoom a = NoVacancy a | Vacancy a deriving (Eq, Ord, Show)
 -- full after adding a new element. Downstream blocks if @view@
 -- indicates that the buffer is empty. Otherwise, @view@ is expected
 -- to return the next element to process and an updated buffer.
-mediatedConnect :: MonadBaseControl IO m
+mediatedConnect :: forall m t b k c. MonadBaseControl IO m
                 => t -> (t -> b -> BufferRoom t) -> (t -> Maybe (b,t))
                 -> MachineT m k b -> ProcessT m b c -> MachineT m k c
 mediatedConnect z snoc view src0 snk0 = 
@@ -99,12 +99,25 @@ mediatedConnect z snoc view src0 snk0 =
                 snkFuture <- asyncRun snk0
                 go z (Just srcFuture) snkFuture
   where -- Wait for the next available step
+        go :: t
+           -> Maybe (AsyncStep m k b)
+           -> AsyncStep m (Is b) c
+           -> m (MachineStep m k c)
         go acc src snk = maybe (Left <$> wait snk) (waitEither snk) src >>=
-                         goStep acc . either (Right . (,src)) (Left . (,snk))
+                           goStep acc . either (Right . (,src)) (Left . (,snk))
+
         -- Kick off the next step of both the source and the sink
+        goAsync :: t
+                -> Maybe (MachineT m k b)
+                -> ProcessT m b c
+                -> m (MachineStep m k c)
         goAsync acc src snk = 
           join $ go acc <$> traverse asyncRun src <*> asyncRun snk
+
         -- Handle whichever step is ready first
+        goStep :: t  -> Either (MachineStep m k b, AsyncStep m (Is b) c)
+                               (MachineStep m (Is b) c, Maybe (AsyncStep m k b))
+               -> m (MachineStep m k c)
         goStep acc step = case step of
           -- @src@ stepped first
           Left (Stop, snk) -> go acc Nothing snk

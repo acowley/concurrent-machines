@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GADTs, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, GADTs, RankNTypes, ScopedTypeVariables #-}
 -- | Internal helpers for taking asynchronous machine steps.
 module Data.Machine.Concurrent.AsyncStep where
 import Control.Concurrent.Async.Lifted (Async, async, wait)
@@ -25,7 +25,8 @@ asyncRun :: MonadBaseControl IO m => MachineT m k o -> m (AsyncStep m k o)
 asyncRun = async . runMachineT
 
 -- | Satisfy a downstream Await by blocking on an upstream step.
-stepAsync :: MonadBaseControl IO m
+stepAsync :: forall m k k' a' d b.
+             MonadBaseControl IO m
            => (forall c. k c -> k' c)
            -> AsyncStep m k a'
            -> (a' -> d)
@@ -37,7 +38,8 @@ stepAsync sel src f def prev go = MachineT $ wait src >>= \u -> case u of
   Stop -> go' stopped def
   Yield a k -> go' k (f a)
   Await g kg fg -> return $ awaitStep g (sel kg) fg (MachineT . flip go' prev)
-  where go' k d = asyncRun k >>= runMachineT . flip go d
+  where go' :: MachineT m k a' -> d -> m (MachineStep m k' b)
+        go' k d = asyncRun k >>= runMachineT . flip go d
 
 -- | @asyncEncased f x@ launches @x@ and provides the resulting
 -- 'AsyncStep' to @f@. Turn a function on 'AsyncStep' to a funciton on

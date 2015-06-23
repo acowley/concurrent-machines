@@ -1,4 +1,5 @@
-{-# LANGUAGE GADTs, FlexibleContexts, RankNTypes, TupleSections #-}
+{-# LANGUAGE GADTs, FlexibleContexts, RankNTypes, ScopedTypeVariables,
+             TupleSections #-}
 -- | The primary use of concurrent machines is to establish a
 -- pipelined architecture that can boost overall throughput by running
 -- each stage of the pipeline at the same time. The processing, or
@@ -70,7 +71,7 @@ waitEither' (Just x) y = waitEither x y
 -- have a source-yielded value to provide it. This, of course,
 -- involves eagerly running the source, percolating its 'Await's up
 -- the chain as soon as possible.
-racers :: MonadBaseControl IO m
+racers :: forall m k a b. MonadBaseControl IO m
        => MachineT m k a -> ProcessT m a b -> MachineT m k b
 racers src snk = MachineT . join $
                  go <$> (Just <$> asyncRun src) <*> asyncRun snk
@@ -80,9 +81,9 @@ racers src snk = MachineT . join $
            -> m (MachineStep m k b)
         go srcA snkA =
           waitEither' srcA snkA >>= \n -> case n of
-            Left Stop -> go Nothing snkA
+            Left (Stop :: MachineStep m k a) -> go Nothing snkA
             Left (Yield o k) -> wait snkA >>= \m -> case m of
-              Stop -> return Stop
+              (Stop :: MachineStep m (Is a) b) -> return Stop
               Yield o' k' -> return . Yield o' . MachineT . flushDown k' $
                              \f -> join $ go <$> (Just <$> asyncRun k)
                                              <*> asyncRun (f o)
@@ -90,7 +91,7 @@ racers src snk = MachineT . join $
                                           <*> asyncRun (f o)
             Left (Await g kg fg) -> asyncAwait g kg fg $
                                     MachineT . flip go snkA . Just
-            Right Stop -> return Stop
+            Right (Stop :: MachineStep m (Is a) b) -> return Stop
             Right (Yield o k) -> asyncRun k >>=
                                  return . Yield o . MachineT . go srcA
             Right (Await f Refl ff) -> case srcA of
