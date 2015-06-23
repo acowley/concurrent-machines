@@ -49,3 +49,5 @@ If we instead run the same arrangement as a pipelined computation, we allow the 
 ```
 
 With this arrangement, the first output we request takes three seconds to produce as we must wait for an input to pass through the entire length of the pipeline. However, successive outputs are following that first output through the pipeline so that we will produce more output at one second intervals. Therefore it takes is `3 + 2 = 5` seconds to produce three outputs: three seconds for the first output, and one second for each of the following two.
+
+[![Build Status](https://travis-ci.org/acowley/concurrent-machines.png)](https://travis-ci.org/acowley/concurrent-machines)
