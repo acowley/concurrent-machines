@@ -4,3 +4,6 @@ dist
 /examples/cabal.sandbox.config
 /.cabbages/
 /.cabal/
+/buildplan
+/default.nix
+/shell.nix

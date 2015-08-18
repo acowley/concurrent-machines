@@ -26,7 +26,7 @@ pipeline = testCaseSteps "pipeline" $ \step -> do
   step "Consistent results"
   assertEqual "Results" r r'
   step "Parallelism"
-  assertBool ("Pipeline faster than sequential" ++ show (dt',dt)) (dt' * 2 < dt)
+  assertBool ("Pipeline faster than sequential" ++ show (dt',dt)) (dt' * 1.5 < dt)
 
 main :: IO ()
 main = defaultMain $ 
