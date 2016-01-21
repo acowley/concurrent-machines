@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.1.0.2
+version:             0.2.0
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -29,7 +29,7 @@ maintainer:          acowley@gmail.com
 copyright:           Copyright (C) 2014 Anthony Cowley
 category:            Concurrency, Control
 build-type:          Simple
--- extra-source-files:  
+extra-source-files:  README.md, CHANGELOG.md
 cabal-version:       >=1.10
 
 source-repository head
@@ -69,3 +69,11 @@ test-suite tests
   default-language: Haskell2010
   build-depends: base >= 4.6 && < 5, concurrent-machines, machines,
                  tasty, tasty-hunit, transformers, time
+
+benchmark fanout
+  type: exitcode-stdio-1.0
+  hs-source-dirs: examples
+  main-is: ExampleFanout.hs
+  build-depends: base >= 4.8 && < 5, time, machines, concurrent-machines
+  default-language: Haskell2010
+  ghc-options: -threaded "-with-rtsopts=-N2"
