@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GADTs, ScopedTypeVariables, TupleSections #-}
+{-# LANGUAGE CPP, FlexibleContexts, GADTs, ScopedTypeVariables, TupleSections #-}
 -- | Place buffers between two machines. This is most useful with
 -- irregular production rates.
 module Data.Machine.Concurrent.Buffer (
@@ -9,7 +9,9 @@ module Data.Machine.Concurrent.Buffer (
   -- * Internal helpers
   mediatedConnect, BufferRoom(..)
   ) where
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Control.Applicative ((<$>), (<*>))
+#endif
 import Control.Concurrent.Async.Lifted (wait, waitEither)
 import Control.Monad.Trans.Control (MonadBaseControl)
 import Control.Monad (join, (>=>))
@@ -17,7 +19,9 @@ import Data.Machine.Concurrent.AsyncStep
 import Data.Machine
 import Data.Sequence (ViewL(..), (|>))
 import qualified Data.Sequence as S
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Data.Traversable (traverse)
+#endif
 
 -- | Drain downstream until it awaits a value, then pass the awaiting
 -- step to the given function.

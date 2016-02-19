@@ -9,7 +9,7 @@ module Data.Machine.Concurrent.Wye (wye) where
 import Control.Applicative
 #endif
 import Control.Concurrent.Async.Lifted (wait, waitEither)
-import Control.Monad.Trans.Control (MonadBaseControl, StM)
+import Control.Monad.Trans.Control (MonadBaseControl)
 import Data.Machine hiding (wye, (~>), (<~))
 import Data.Machine.Concurrent.AsyncStep
 

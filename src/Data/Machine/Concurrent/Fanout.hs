@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GADTs, ScopedTypeVariables #-}
+{-# LANGUAGE CPP, FlexibleContexts, GADTs, ScopedTypeVariables #-}
 -- | Provide a notion of fanout wherein a single input is passed to
 -- several consumers. The consumers are run concurrently.
 module Data.Machine.Concurrent.Fanout (fanout, fanoutSteps) where
@@ -9,10 +9,14 @@ import Control.Monad.Trans.Control (MonadBaseControl, StM)
 import Data.Machine (Step(..), MachineT(..), encased, ProcessT, Is(..))
 import Data.Machine.Concurrent.AsyncStep (MachineStep)
 import Data.Maybe (catMaybes)
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Data.Monoid (Monoid, mempty, mconcat)
+#endif
 import Data.Semigroup (Semigroup(sconcat))
 import Data.List.NonEmpty (NonEmpty((:|)))
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Data.Coerce (coerce)
+#endif
 
 -- | Feed a value to a 'ProcessT' at an 'Await' 'Step'. If the
 -- 'ProcessT' is awaiting a value, then its next step is
