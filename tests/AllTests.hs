@@ -28,7 +28,24 @@ pipeline = testCaseSteps "pipeline" $ \step -> do
   step "Parallelism"
   assertBool ("Pipeline faster than sequential" ++ show (dt',dt)) (dt' * 1.5 < dt)
 
+workStealing :: TestTree
+workStealing = testCaseSteps "work stealing" $ \step -> do
+  (r,dt) <- timed . runT $
+            source [1..32::Int] ~> scatter (replicate 4 slowDoubler)
+  (r',dt') <- timed. runT $ source [1..32] ~> slowDoubler
+  step "Consistent results"
+  assertBool "Predicted Parallel Length" (length r == 32)
+  assertBool "Predicted Serial Length" (length r' == 32)
+  assertBool "Predicted Results" (all (`elem` r) (map (*2) [1..32]))
+  assertBool "Results" (all (`elem` r) r')
+  step "Parallelism"
+  assertBool ("Work Stealing faster than sequential" ++ show (dt',dt))
+             (dt * 1.5 < dt')
+  where slowDoubler = repeatedly $ do x <- await
+                                      liftIO (threadDelay 100000)
+                                      yield (x * 2)
+
 main :: IO ()
 main = defaultMain $ 
        testGroup "concurrent-machines"
-       [ pipeline ]
+       [ pipeline, workStealing ]

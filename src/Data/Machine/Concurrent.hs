@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, FlexibleContexts, RankNTypes, ScopedTypeVariables,
+{-# LANGUAGE CPP, GADTs, FlexibleContexts, RankNTypes, ScopedTypeVariables,
              TupleSections #-}
 -- | The primary use of concurrent machines is to establish a
 -- pipelined architecture that can boost overall throughput by running
@@ -21,9 +21,11 @@ module Data.Machine.Concurrent (module Data.Machine,
                                 -- * Concurrent processing of shared inputs
                                 fanout, fanoutSteps,
                                 -- * Concurrent multiple-input machines
-                                wye, tee, scatter, splitSum, mergeSum, 
+                                wye, tee, scatter, splitSum, mergeSum,
                                 splitProd) where
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Control.Applicative
+#endif
 import Control.Concurrent.Async.Lifted
 import Control.Monad (join)
 import Control.Monad.Trans.Control

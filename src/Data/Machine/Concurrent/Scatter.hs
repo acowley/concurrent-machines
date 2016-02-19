@@ -78,9 +78,9 @@ scatter sinks = MachineT $ mapM asyncRun sinks
 --
 -- @
 --                                 sinkL
---                                /      \
---                              a          \
---                             /            \
+--                                /      \\
+--                              a          \\
+--                             /            \\
 --    source -- Either a b -->                -- r -->
 --                             \\            /
 --                              b          /
@@ -205,9 +205,9 @@ leftOnly snk = repeatedly (await >>= either yield (const stop)) ~> snk
 --
 -- @
 --                            sink1
---                           /      \
---                         a          \
---                        /            \
+--                           /      \\
+--                         a          \\
+--                        /            \\
 --    source -- (a,b) -->               -- r -->
 --                        \\            /
 --                         b         /

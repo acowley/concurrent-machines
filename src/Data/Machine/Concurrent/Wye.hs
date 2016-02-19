@@ -1,11 +1,13 @@
-{-# LANGUAGE GADTs, FlexibleContexts, RankNTypes, ScopedTypeVariables,
+{-# LANGUAGE CPP, GADTs, FlexibleContexts, RankNTypes, ScopedTypeVariables,
              TupleSections #-}
 -- | Support for machines with two inputs from which input may be
 -- drawn deterministically or non-deterministically. In contrast to
 -- "Data.Machine.Wye", the two inputs are eagerly run concurrently in
 -- this implementation.
 module Data.Machine.Concurrent.Wye (wye) where
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
 import Control.Applicative
+#endif
 import Control.Concurrent.Async.Lifted (wait, waitEither)
 import Control.Monad.Trans.Control (MonadBaseControl, StM)
 import Data.Machine hiding (wye, (~>), (<~))
