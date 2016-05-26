@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, FlexibleContexts, GADTs, ScopedTypeVariables, TupleSections #-}
+ {-# LANGUAGE CPP, FlexibleContexts, GADTs, ScopedTypeVariables, TupleSections #-}
 -- | Place buffers between two machines. This is most useful with
 -- irregular production rates.
 module Data.Machine.Concurrent.Buffer (
@@ -25,7 +25,7 @@ import Data.Traversable (traverse)
 
 -- | Drain downstream until it awaits a value, then pass the awaiting
 -- step to the given function.
-drain :: (Functor m, Monad m)
+drain :: Monad m
       => MachineStep m k a
       -> (MachineStep m k a -> m (MachineStep m k' a))
       -> m (MachineStep m k' a)

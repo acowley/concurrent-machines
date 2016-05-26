@@ -14,8 +14,7 @@ tee :: forall m a a' b b' c. MonadBaseControl IO m
 tee ma mb m = MachineT $ do srcL <- asyncRun ma
                             srcR <- asyncRun mb
                             go m (Just srcL) (Just srcR)
-  where go :: MonadBaseControl IO m
-           => TeeT m a' b' c
+  where go :: TeeT m a' b' c
            -> Maybe (AsyncStep m (Is a) a')
            -> Maybe (AsyncStep m (Is b) b')
            -> m (MachineStep m (T a b) c)

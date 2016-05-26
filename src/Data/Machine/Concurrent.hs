@@ -77,8 +77,7 @@ racers :: forall m k a b. MonadBaseControl IO m
        => MachineT m k a -> ProcessT m a b -> MachineT m k b
 racers src snk = MachineT . join $
                  go <$> (Just <$> asyncRun src) <*> asyncRun snk
-  where go :: MonadBaseControl IO m
-           => Maybe (AsyncStep m k a)
+  where go :: Maybe (AsyncStep m k a)
            -> AsyncStep m (Is a) b
            -> m (MachineStep m k b)
         go srcA snkA =
@@ -106,8 +105,7 @@ racers src snk = MachineT . join $
                        go <$> (Just <$> asyncRun k) <*> asyncRun (f o)
         -- If we have an upstream source value ready, we must flush
         -- all available values yielded by downstream until it awaits.
-        flushDown :: Monad m
-                  => ProcessT m a b
+        flushDown :: ProcessT m a b
                   -> ((a -> ProcessT m a b) -> m (MachineStep m k b))
                   -> m (MachineStep m k b)
         flushDown m k = runMachineT m >>= \s -> case s of
@@ -117,8 +115,7 @@ racers src snk = MachineT . join $
         -- If downstream is awaiting an input, we must pull in all
         -- necessary upstream awaits until we have a yielded value to
         -- push downstream.
-        feedUp :: MonadBaseControl IO m
-               => MachineT m k a
+        feedUp :: MachineT m k a
                -> (a -> MachineT m k a -> m (MachineStep m k b))
                -> m (MachineStep m k b)
         feedUp m k = runMachineT m >>= \s -> case s of

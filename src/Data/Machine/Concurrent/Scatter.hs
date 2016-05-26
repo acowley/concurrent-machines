@@ -92,8 +92,7 @@ mergeSum :: forall m a b r. MonadBaseControl IO m
 mergeSum snkL snkR = MachineT $ do sl <- asyncRun snkL
                                    sr <- asyncRun snkR
                                    go sl sr
-  where go :: MonadBaseControl IO m
-           => AsyncStep m (Is a) r
+  where go :: AsyncStep m (Is a) r
            -> AsyncStep m (Is b) r
            -> m (MachineStep m (Is (Either a b)) r)
         go sl sr = waitEither sl sr >>= 
@@ -137,8 +136,7 @@ splitSum snkL snkR = MachineT $ do sl <- asyncRun (fmap lft snkL)
         lft = Left
         rgt :: d -> Either b d
         rgt = Right
-        go :: MonadBaseControl IO m
-           => AsyncStep m (Is a) (Either b d)
+        go :: AsyncStep m (Is a) (Either b d)
            -> AsyncStep m (Is c) (Either b d)
            -> m (MachineStep m (Is (Either a c)) (Either b d))
         go sl sr = waitEither sl sr >>=

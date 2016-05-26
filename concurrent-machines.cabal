@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.2.1
+version:             0.2.3
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -31,6 +31,7 @@ category:            Concurrency, Control
 build-type:          Simple
 extra-source-files:  README.md, CHANGELOG.md
 cabal-version:       >=1.10
+tested-with:         GHC == 7.10.3, GHC == 8.0.1
 
 source-repository head
   type:     git
@@ -48,13 +49,13 @@ library
   -- other-modules:       
   other-extensions:    GADTs, FlexibleContexts, RankNTypes, TupleSections, 
                        ScopedTypeVariables
-  build-depends:       base >= 4.6 && < 5,
+  build-depends:       base >= 4.6 && < 4.10,
                        monad-control >= 1.0 && < 1.1,
-                       transformers >= 0.4 && < 0.5,
-                       time >= 1.4 && < 1.6,
+                       transformers >= 0.4 && < 0.6,
+                       time >= 1.4 && < 1.7,
                        containers >= 0.5 && < 0.6,
-                       transformers-base >= 0.4 && < 0.5,
-                       machines >= 0.5 && < 0.6,
+                       transformers-base >= 0.4 && < 0.6,
+                       machines >= 0.5 && < 0.7,
                        async >= 2.0.1 && < 2.2,
                        lifted-async >= 0.1 && < 0.9,
                        semigroups >= 0.8 && < 0.19

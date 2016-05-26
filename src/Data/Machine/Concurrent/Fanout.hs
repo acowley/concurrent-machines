@@ -31,7 +31,7 @@ feed x m = async $ runMachineT m >>= \(v :: MachineStep m (Is a) b) ->
 
 -- | Like 'Data.List.mapAccumL' but with a monadic accumulating
 -- function.
-mapAccumLM :: (Functor m, MonadBaseControl IO m)
+mapAccumLM :: MonadBaseControl IO m
            => (acc -> x -> m (acc, y)) -> acc -> [Async (StM m x)]
            -> m (acc, [y])
 mapAccumLM f z = fmap (second ($ [])) . foldM aux (z,id)
@@ -51,7 +51,7 @@ flushYields = go id
 -- | Share inputs with each of a list of processes in lockstep. Any
 -- values yielded by the processes for a given input are combined into
 -- a single yield from the composite process.
-fanout :: (Functor m, MonadBaseControl IO m, Semigroup r)
+fanout :: (MonadBaseControl IO m, Semigroup r)
        => [ProcessT m a r] -> ProcessT m a r
 fanout xs = encased $ Await (MachineT . aux) Refl (fanout xs)
   where aux y = do (rs,xs') <- mapM (feed y) xs >>= mapAccumLM yields []
@@ -70,7 +70,7 @@ fanout xs = encased $ Await (MachineT . aux) Refl (fanout xs)
 -- run a collection of 'ProcessT's that await but don't yield some
 -- number of times, you can use 'fanOutSteps . map (fmap (const ()))'
 -- followed by a 'taking' process.
-fanoutSteps :: (Functor m, MonadBaseControl IO m, Monoid r)
+fanoutSteps :: (MonadBaseControl IO m, Monoid r)
             => [ProcessT m a r] -> ProcessT m a r
 fanoutSteps xs = encased $ Await (MachineT . aux) Refl (fanoutSteps xs)
   where aux y = do (rs,xs') <- mapM (feed y) xs >>= mapAccumLM yields []
