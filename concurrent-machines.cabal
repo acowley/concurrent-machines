@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.2.3.2
+version:             0.2.3.3
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -49,7 +49,7 @@ library
   -- other-modules:
   other-extensions:    GADTs, FlexibleContexts, RankNTypes, TupleSections,
                        ScopedTypeVariables
-  build-depends:       base >= 4.6 && < 4.10,
+  build-depends:       base >= 4.8 && < 4.10,
                        monad-control >= 1.0 && < 1.1,
                        transformers >= 0.4 && < 0.6,
                        time >= 1.4 && < 1.8,
