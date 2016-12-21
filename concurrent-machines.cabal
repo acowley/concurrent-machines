@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.2.3.1
+version:             0.2.3.2
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -46,13 +46,13 @@ library
                        Data.Machine.Concurrent.Scatter,
                        Data.Machine.Concurrent.Tee,
                        Data.Machine.Concurrent.Wye
-  -- other-modules:       
-  other-extensions:    GADTs, FlexibleContexts, RankNTypes, TupleSections, 
+  -- other-modules:
+  other-extensions:    GADTs, FlexibleContexts, RankNTypes, TupleSections,
                        ScopedTypeVariables
   build-depends:       base >= 4.6 && < 4.10,
                        monad-control >= 1.0 && < 1.1,
                        transformers >= 0.4 && < 0.6,
-                       time >= 1.4 && < 1.7,
+                       time >= 1.4 && < 1.8,
                        containers >= 0.5 && < 0.6,
                        transformers-base >= 0.4 && < 0.6,
                        machines >= 0.5 && < 0.7,
