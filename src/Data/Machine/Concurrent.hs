@@ -16,7 +16,6 @@ module Data.Machine.Concurrent (module Data.Machine,
                                 -- * Concurrent connection
                                 (>~>), (<~<),
                                 -- * Buffered machines
-                                buffer, rolling,
                                 bufferConnect, rollingConnect,
                                 -- * Concurrent processing of shared inputs
                                 fanout, fanoutSteps,
@@ -61,7 +60,7 @@ ma >~> mp = mp <~< ma
 infixl 7 >~>
 
 -- | We want the first available response.
-waitEither' :: MonadBaseControl IO m 
+waitEither' :: MonadBaseControl IO m
             => Maybe (Async (StM m a)) -> Async (StM m b)
             -> m (Either a b)
 waitEither' Nothing y = Right <$> wait y

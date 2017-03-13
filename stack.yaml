@@ -1,12 +1,18 @@
-resolver: lts-7.14
+resolver: lts-8.0
 
 packages:
 - ./.
 
-extra-deps: []
+extra-deps:
+- strptime-1.0.10
+- vcs-revision-0.0.2
+- splot-0.3.14
 
 # Override default flag values for local packages and extra-deps
 flags: {}
 
 # Extra package databases containing global packages
 extra-package-dbs: []
+
+nix:
+  packages: [cairo pkgconfig zlib]

@@ -3,9 +3,9 @@
 -- irregular production rates.
 module Data.Machine.Concurrent.Buffer (
   -- * Blocking buffers
-  bufferConnect, buffer,
+  bufferConnect,
   -- * Non-blocking (rolling) buffers
-  rollingConnect, rolling,
+  rollingConnect,
   -- * Internal helpers
   mediatedConnect, BufferRoom(..)
   ) where
@@ -71,23 +71,10 @@ rollingConnect n = mediatedConnect S.empty snoc view
                      EmptyL -> Nothing
                      x :< acc' -> Just (x, acc')
 
--- | Eagerly request values from the wrapped machine. Values are
--- placed in a buffer of the given size. When the buffer is full
--- (i.e. downstream is running behind), we stop pumping the wrapped
--- machine.
-buffer :: MonadBaseControl IO m => Int -> MachineT m k o -> MachineT m k o
-buffer n src = bufferConnect n src echo
-
--- | Eagerly request values from the wrapped machine. Values are
--- placed in a rolling buffer of the given size. If downstream can not
--- catch up, values yielded by the wrapped machine will be dropped.
-rolling :: MonadBaseControl IO m => Int -> MachineT m k o -> MachineT m k o
-rolling n src = rollingConnect n src echo
-
 -- | Indication if the payload value is "full" or not.
 data BufferRoom a = NoVacancy a | Vacancy a deriving (Eq, Ord, Show)
 
--- | Mediate a 'MachineT' and a 'ProcessT' with a buffer. 
+-- | Mediate a 'MachineT' and a 'ProcessT' with a buffer.
 --
 -- @mediatedConnect z snoc view source sink@ pipes @source@ into
 -- @sink@ through a buffer initialized to @z@ and updated with
@@ -98,7 +85,7 @@ data BufferRoom a = NoVacancy a | Vacancy a deriving (Eq, Ord, Show)
 mediatedConnect :: forall m t b k c. MonadBaseControl IO m
                 => t -> (t -> b -> BufferRoom t) -> (t -> Maybe (b,t))
                 -> MachineT m k b -> ProcessT m b c -> MachineT m k c
-mediatedConnect z snoc view src0 snk0 = 
+mediatedConnect z snoc view src0 snk0 =
   MachineT $ do srcFuture <- asyncRun src0
                 snkFuture <- asyncRun snk0
                 go z (Just srcFuture) snkFuture
@@ -115,7 +102,7 @@ mediatedConnect z snoc view src0 snk0 =
                 -> Maybe (MachineT m k b)
                 -> ProcessT m b c
                 -> m (MachineStep m k c)
-        goAsync acc src snk = 
+        goAsync acc src snk =
           join $ go acc <$> traverse asyncRun src <*> asyncRun snk
 
         -- Handle whichever step is ready first
@@ -125,22 +112,22 @@ mediatedConnect z snoc view src0 snk0 =
         goStep acc step = case step of
           -- @src@ stepped first
           Left (Stop, snk) -> go acc Nothing snk
-          Left (Await g kg fg, snk) -> 
+          Left (Await g kg fg, snk) ->
             asyncAwait g kg fg (MachineT . flip (go acc) snk . Just)
           Left (Yield o k, snk) -> case snoc acc o of
             -- add it to the right end of the buffer
             Vacancy acc' -> asyncRun k >>= flip (go acc') snk . Just
             -- buffer was full
-            NoVacancy acc' -> 
+            NoVacancy acc' ->
               let go' snk' = do src' <- asyncRun k
                                 goStep acc' (Right (snk', Just src'))
               in wait snk >>= flip drain go'
 
           -- @snk@ stepped first
           Right (Stop, _) -> return Stop
-          Right (Yield o k, src) -> 
+          Right (Yield o k, src) -> do
             return $ Yield o (MachineT $ asyncRun k >>= go acc src)
-          Right (Await f Refl ff, src) -> 
+          Right (Await f Refl ff, src) ->
             case view acc of
               Nothing -> maybe (goAsync acc Nothing ff) (wait >=> demandSrc) src
               Just (x, acc') -> asyncRun (f x) >>= go acc' src
