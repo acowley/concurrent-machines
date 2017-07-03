@@ -6,7 +6,7 @@ import Control.Arrow (first, second)
 import Control.Concurrent.Async.Lifted (Async, async, wait)
 import Control.Monad (foldM)
 import Control.Monad.Trans.Control (MonadBaseControl, StM)
-import Data.Machine (Step(..), MachineT(..), encased, ProcessT, Is(..))
+import Data.Machine (Step(..), MachineT(..), encased, stopped, ProcessT, Is(..))
 import Data.Machine.Concurrent.AsyncStep (MachineStep)
 import Data.Maybe (catMaybes)
 #if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ < 710
@@ -53,6 +53,7 @@ flushYields = go id
 -- a single yield from the composite process.
 fanout :: (MonadBaseControl IO m, Semigroup r)
        => [ProcessT m a r] -> ProcessT m a r
+fanout [] = stopped
 fanout xs = encased $ Await (MachineT . aux) Refl (fanout xs)
   where aux y = do (rs,xs') <- mapM (feed y) xs >>= mapAccumLM yields []
                    let nxt = fanout $ catMaybes xs'
@@ -72,6 +73,7 @@ fanout xs = encased $ Await (MachineT . aux) Refl (fanout xs)
 -- followed by a 'taking' process.
 fanoutSteps :: (MonadBaseControl IO m, Monoid r)
             => [ProcessT m a r] -> ProcessT m a r
+fanoutSteps [] = stopped
 fanoutSteps xs = encased $ Await (MachineT . aux) Refl (fanoutSteps xs)
   where aux y = do (rs,xs') <- mapM (feed y) xs >>= mapAccumLM yields []
                    let nxt = fanoutSteps $ catMaybes xs'

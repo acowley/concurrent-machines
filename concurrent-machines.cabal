@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.3.0
+version:             0.3.1
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
