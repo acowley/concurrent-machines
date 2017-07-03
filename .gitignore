@@ -7,3 +7,4 @@ dist
 /buildplan
 /default.nix
 /shell.nix
+.stack-work/
