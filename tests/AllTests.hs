@@ -1,4 +1,6 @@
+{-# LANGUAGE RankNTypes #-}
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
+import Control.Applicative ((<|>))
 import Control.Concurrent (threadDelay)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Machine.Concurrent
@@ -16,6 +18,28 @@ timed m = do t1 <- liftIO getCurrentTime
              r <- m
              t2 <- liftIO getCurrentTime
              return (r, realToFrac $ t2 `diffUTCTime` t1)
+
+
+-- Based on GitHub Issue 7
+-- https://github.com/acowley/concurrent-machines/issues/7
+alternativeWorks :: TestTree
+alternativeWorks = testCase "alternative" $ do
+  xs <- runT (replicated 5 "Step" ~> construct aux)
+  assertEqual "Results" (replicate 5 "Step" ++ ["Done"]) xs
+  where aux = do x <- await <|> yield "Done" *> stop
+                 yield x
+                 aux
+
+alternativeWorksDelay :: TestTree
+alternativeWorksDelay = testCase "alternative with delay" $ do
+  xs <- runT (construct (gen 5) ~> construct aux)
+  assertEqual "Results" (replicate 5 "Step" ++ ["Done"]) xs
+  where aux = do x <- await <|> yield "Done" *> stop
+                 yield x
+                 aux
+        gen :: MonadIO m => Int -> PlanT k String m a
+        gen 0 = stop
+        gen n = yield "Step" >> liftIO (threadDelay 100000) >> gen (n-1)
 
 pipeline :: TestTree
 pipeline = testCaseSteps "pipeline" $ \step -> do
@@ -46,6 +70,6 @@ workStealing = testCaseSteps "work stealing" $ \step -> do
                                       yield (x * 2)
 
 main :: IO ()
-main = defaultMain $ 
+main = defaultMain $
        testGroup "concurrent-machines"
-       [ pipeline, workStealing ]
+       [ pipeline, workStealing, alternativeWorks, alternativeWorksDelay ]

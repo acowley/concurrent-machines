@@ -1,4 +1,4 @@
-resolver: lts-8.21
+resolver: nightly-2017-09-18
 
 packages:
 - ./.
@@ -15,4 +15,4 @@ flags: {}
 extra-package-dbs: []
 
 nix:
-  packages: [cairo pkgconfig zlib]
+  shell-file: shell.nix
