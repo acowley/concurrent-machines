@@ -54,7 +54,7 @@ library
   -- other-modules:
   other-extensions:    GADTs, FlexibleContexts, RankNTypes, TupleSections,
                        ScopedTypeVariables
-  build-depends:       base >= 4.8 && < 4.10,
+  build-depends:       base >= 4.8 && < 5,
                        monad-control >= 1.0 && < 1.1,
                        transformers >= 0.4 && < 0.6,
                        time >= 1.4 && < 1.9,
