@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.3.1
+version:             0.3.1.1
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -57,7 +57,7 @@ library
   build-depends:       base >= 4.8 && < 5,
                        monad-control >= 1.0 && < 1.1,
                        transformers >= 0.4 && < 0.6,
-                       time >= 1.4 && < 1.9,
+                       time >= 1.4 && < 1.10,
                        containers >= 0.5 && < 0.6,
                        transformers-base >= 0.4 && < 0.6,
                        machines >= 0.5 && < 0.7,
