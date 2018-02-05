@@ -1,5 +1,5 @@
 name:                concurrent-machines
-version:             0.3.1.1
+version:             0.3.1.2
 synopsis:            Concurrent networked stream transducers
 
 description: A simple use-case for this library is to run the stages
@@ -61,7 +61,7 @@ library
                        containers >= 0.5 && < 0.6,
                        transformers-base >= 0.4 && < 0.6,
                        machines >= 0.5 && < 0.7,
-                       async >= 2.0.1 && < 2.2,
+                       async >= 2.0.1 && < 2.3,
                        lifted-async >= 0.1 && < 0.10,
                        semigroups >= 0.8 && < 0.19
   hs-source-dirs:      src
