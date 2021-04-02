@@ -74,7 +74,7 @@ test-suite tests
   main-is: AllTests.hs
   ghc-options: -Wall -threaded
   default-language: Haskell2010
-  build-depends: base >= 4.6 && < 5, concurrent-machines, machines,
+  build-depends: base, concurrent-machines, machines,
                  tasty, tasty-hunit, transformers, time
 
 -- This is a nice modification of the tests that generates plots for
@@ -92,13 +92,13 @@ test-suite splotime
   ghc-options: -Wall -O0
   default-language: Haskell2010
   if flag(splot)
-    build-depends: base >= 4.6 && < 5, concurrent-machines, machines,
+    build-depends: base, concurrent-machines, machines,
                    process, tasty, tasty-hunit, transformers, time
 
 benchmark fanout
   type: exitcode-stdio-1.0
   hs-source-dirs: examples
   main-is: ExampleFanout.hs
-  build-depends: base >= 4.8 && < 5, time, machines, concurrent-machines
+  build-depends: base, time, machines, concurrent-machines
   default-language: Haskell2010
   ghc-options: -threaded "-with-rtsopts=-N2"
