@@ -7,3 +7,4 @@
 /.cabal/
 /buildplan
 .stack-work/
+*~
