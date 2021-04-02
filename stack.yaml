@@ -1,7 +1,7 @@
-resolver: lts-10.4
+resolver: lts-17.8
 
 packages:
-- ./.
+- .
 
 extra-deps:
 - strptime-1.0.10
@@ -13,6 +13,3 @@ flags: {}
 
 # Extra package databases containing global packages
 extra-package-dbs: []
-
-nix:
-  shell-file: shell.nix
