@@ -14,7 +14,7 @@ import Data.Time.Clock (getCurrentTime, diffUTCTime)
 regulated :: MonadIO m => Double -> ProcessT m a a
 regulated target = construct $ liftIO getCurrentTime >>= go 0
   where go dt prevT =
-          do await >>= yield
+          do await >>= \x -> yield x
              t <- liftIO getCurrentTime
              let e = target - realToFrac (diffUTCTime t prevT)
                  dt' = dt + 0.5 * e

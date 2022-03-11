@@ -186,13 +186,13 @@ forceFeed go x = aux
 -- keep running it as long as upstream does not yield a 'Left' which
 -- we can not handle. When upstream yields a 'Left', we 'stop'.
 rightOnly :: Monad m => ProcessT m b r -> ProcessT m (Either a b) r
-rightOnly snk = repeatedly (await >>= either (const stop) yield) ~> snk
+rightOnly snk = repeatedly (await >>= either (const stop) (\x -> yield x)) ~> snk
 
 -- | We have a sink for the Left output of a source, so we want to
 -- keep running it as long as upstream does not yield a 'Right' which
 -- we can not handle. When upstream yields a 'Right', we 'stop'.
 leftOnly :: Monad m => ProcessT m a r -> ProcessT m (Either a b) r
-leftOnly snk = repeatedly (await >>= either yield (const stop)) ~> snk
+leftOnly snk = repeatedly (await >>= either (\x -> yield x) (const stop)) ~> snk
 
 -- | Connect two processes to the downstream tails of a 'Machine' that
 -- produces tuples. The two downstream consumers are run
